@@ -1,0 +1,35 @@
+Package: disruptr
+Title: Facilitate in-silico repression experiments on graph-structured data
+Version: 0.0.0.9000
+Authors@R: 
+    c(person(given = "Davis",
+           family = "Weaver",
+           role = c("aut", "cre"),
+           email = "davis.weaver@case.edu"),
+      person(given = "Jessica", 
+           family = "Scarborough", 
+           role = c("ctb"),
+           email = "jessica.scarborough@case.edu"))
+Description: What the package does (one paragraph).
+License: GPL (>= 3)
+Imports:
+    crosstalkr,
+    igraph,
+    dplyr,
+    tidyr,
+    readr, 
+    magrittr,
+    httr,
+    readxl,
+    janitor
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Suggests: 
+    testthat (>= 2.0.0),
+    here,
+    msigdbr
+Config/testthat/edition: 2
+Depends: 
+    R (>= 2.10)
