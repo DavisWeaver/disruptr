@@ -14,11 +14,12 @@ calc_np_all <- function(exp, g, v = as.character(names(igraph::V(g)))) {
 
   vertices <- as.character(names(igraph::V(g))) #in most cases this will be the same as `v`
 
-  #In the condition that there are fewer nodes in the graph than the supplied expression value
-  #(as you would see in node_suppression usage.)
-  if(length(vertices) < length(exp)) {
-    exp <- exp[names(exp) %in% vertices]
-  }
+  # remove any names of exp that are not in the graph.
+  exp <- exp[names(exp) %in% vertices]
+  # need to do the same thing for v (because sometimes there will be neighbors of a given node that aren't in the ppi)
+  v <- v[v %in% vertices]
+
+
 
   #get a list of neighbors for each node
   neighbors <-

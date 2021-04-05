@@ -8,8 +8,7 @@ node_repression(
   g,
   v_rm,
   state_function = calc_np_all,
-  only_neighbors,
-  ncores,
+  neighbors_only = TRUE,
   ...
 )
 }
@@ -20,9 +19,7 @@ node_repression(
 
 \item{state_function}{function to use to calculate network state before and after node_repression}
 
-\item{only_neighbors}{if state function makes calculation for each node, should recalculation be limited to neighbors of the removed node?}
-
-\item{ncores}{number of cores to use for parallel processing.}
+\item{neighbors_only}{logical designating whether state function should be calculated for all nodes or just neighbors}
 
 \item{...}{additional parameters passed to state function.}
 }
