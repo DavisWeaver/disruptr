@@ -23,7 +23,9 @@ get_gdsc <- function(cache = NULL) {
   #get metadata
   meta_df <- get_meta(cache = cache)
 
-  return(list(exp_df, drug_df, meta_df))
+  dna_df <- get_dna()
+
+  return(list(exp_df, drug_df, meta_df, dna_df))
 
 }
 
@@ -88,6 +90,19 @@ get_meta <- function(cache) {
   return(df)
 }
 
+#' helper function to get DNA seq data
+#'
+#'
+
+get_dna <- function() {
+  #download the data
+  url1<- "https://www.cancerrxgene.org/gdsc1000/GDSC1000_WebResources//Data/suppData/TableS2C.xlsx"
+  httr::GET(url1, httr::write_disk(tf <- tempfile(fileext = ".xlsx")))
+
+  #read into R
+  df <- suppressWarnings(readxl::read_excel(tf, skip = 18)) # do it quietly
+  return(df)
+}
 
 #' clean the GDSC data
 #'
@@ -111,10 +126,15 @@ clean_gdsc <- function(cache = NULL) {
   response_df <- df_list[[2]]
   response_df <- clean_response(response_df)
 
+  #grab and clean expression data
   exp_df <- df_list[[1]]
   exp_df <- clean_expression(exp_df)
 
-  return(list(meta_df, response_df, exp_df))
+  #grab and clean dna variants data
+  dna_df <- df_list[[4]]
+  dna_df <- clean_dna(dna_df)
+
+  return(list(meta_df, response_df, exp_df, dna_df))
 
 }
 
@@ -207,4 +227,20 @@ clean_expression <- function(df) {
     dplyr::mutate(log_expression = log2(expression))
  return(df)
 }
+
+#' Function to clean dna variant data from gdsc
+#' data can be fouund [here](https://www.cancerrxgene.org/gdsc1000/GDSC1000_WebResources/Home.html).
+#'
+#' @inheritParams clean_meta
+#'
+#' @importFrom magrittr %>%
+#'
+
+clean_dna <- function(df) {
+  df <- df %>%
+    janitor::clean_names() %>%
+    dplyr::rename(cell_line = cosmic_id)
+  return(df)
+}
+
 

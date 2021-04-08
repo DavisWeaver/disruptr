@@ -146,6 +146,7 @@ GDSC_repress <- function(cache = NULL, v_rm = "EGFR", ncores = 1) {
 #' @param cell_lines unique vector of cell lines
 #' @param i index value for `cell_lines
 #'
+#' @export
 
 calc_exp <- function(df, cell_lines, i) {
   df_i <- dplyr::filter(df, cell_line == cell_lines[i])
@@ -159,6 +160,7 @@ calc_exp <- function(df, cell_lines, i) {
 #' @inheritParams calc_exp
 #' @param repression_vector
 #'
+#' @export
 
 bind_repression <- function(df, cell_lines, i, repression_vector, v_rm) {
   df_i <- dplyr::filter(df, cell_line == cell_lines[i])
@@ -172,4 +174,35 @@ bind_repression <- function(df, cell_lines, i, repression_vector, v_rm) {
   return(df_i)
 
 }
+
+#' function to summarise output from `GDSC_repress`
+#'
+#' @param df data frame containing NP difference from in-silico repression of a given gene
+#'
+#' Computes the total network potential/ difference in network potential with repression of a given gene,
+#' expression for the repressed gene, network potential for the repressed gene.
+#'
+#' @importFrom magrittr %>%
+#'
+#' @export
+
+clean_output <- function(df) {
+  df <- df %>%
+    dplyr::filter(!is.na(np),
+                  !is.infinite(np)) %>%
+    dplyr::group_by(cell_line) %>%
+    dplyr::summarise(total_np = sum(.data$np),
+                     diff_np = sum(.data$np_diff),
+                     egfr_exp = sum(ifelse(
+                       gene_symbols == 'EGFR',
+                       .data$log_expression,
+                       0)),
+                     egfr_np = sum(ifelse(
+                       gene_symbols == 'EGFR',
+                       .data$np,
+                       0))) %>%
+    dplyr::mutate(diff_np_scaled = .data$diff_np/.data$total_np)
+}
+
+
 
