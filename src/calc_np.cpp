@@ -4,7 +4,7 @@ using namespace Rcpp;
 
 // [[Rcpp::export]]
 
-double fcalc_np(double c_i, NumericVector c_j) {
+double fcalc_np(double c_i, NumericVector &c_j) {
   //initialize c_j_sum
   double c_j_sum = 0;
   int n = c_j.size();
