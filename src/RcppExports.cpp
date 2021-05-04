@@ -6,26 +6,26 @@
 using namespace Rcpp;
 
 // fcalc_np
-double fcalc_np(double c_i, NumericVector c_j);
+double fcalc_np(double& c_i, NumericVector& c_j);
 RcppExport SEXP _disruptr_fcalc_np(SEXP c_iSEXP, SEXP c_jSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type c_i(c_iSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type c_j(c_jSEXP);
+    Rcpp::traits::input_parameter< double& >::type c_i(c_iSEXP);
+    Rcpp::traits::input_parameter< NumericVector& >::type c_j(c_jSEXP);
     rcpp_result_gen = Rcpp::wrap(fcalc_np(c_i, c_j));
     return rcpp_result_gen;
 END_RCPP
 }
 // fcalc_np_all
-NumericVector fcalc_np_all(List neighbors, StringVector v, NumericVector exp);
+NumericVector fcalc_np_all(List& neighbors, StringVector& v, NumericVector& exp);
 RcppExport SEXP _disruptr_fcalc_np_all(SEXP neighborsSEXP, SEXP vSEXP, SEXP expSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< List >::type neighbors(neighborsSEXP);
-    Rcpp::traits::input_parameter< StringVector >::type v(vSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type exp(expSEXP);
+    Rcpp::traits::input_parameter< List& >::type neighbors(neighborsSEXP);
+    Rcpp::traits::input_parameter< StringVector& >::type v(vSEXP);
+    Rcpp::traits::input_parameter< NumericVector& >::type exp(expSEXP);
     rcpp_result_gen = Rcpp::wrap(fcalc_np_all(neighbors, v, exp));
     return rcpp_result_gen;
 END_RCPP

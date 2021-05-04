@@ -68,11 +68,13 @@ calc_np_all2 <- function(exp, g, v = as.character(names(igraph::V(g)))) {
   # need to do the same thing for v (because sometimes there will be neighbors of a given node that aren't in the ppi)
   v <- v[v %in% vertices]
 
+  #re-order exp to have the same order as v
+  exp <- exp[v]
+
   #get a list of neighbors for each node
   neighbors <-
     lapply(v,
            get_neighbors, g = g)
-  names(neighbors) <- v
 
   #run cpp function to do the actual calculation on each node
   np_vec <- fcalc_np_all(neighbors = neighbors, v = v, exp = exp)
@@ -85,7 +87,6 @@ calc_np_all2 <- function(exp, g, v = as.character(names(igraph::V(g)))) {
 
   return(np_vec)
 }
-
 
 #' calculate network potential for one node.
 #'
