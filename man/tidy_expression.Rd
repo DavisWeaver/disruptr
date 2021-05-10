@@ -4,7 +4,7 @@
 \alias{tidy_expression}
 \title{helper function to convert expression matrix to tidy dataframe (if not already)}
 \usage{
-tidy_expression()
+tidy_expression(df)
 }
 \description{
 helper function to convert expression matrix to tidy dataframe (if not already)
