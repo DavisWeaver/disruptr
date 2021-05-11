@@ -50,30 +50,6 @@ calc_gdsc_np <- function(cache = NULL, ncores = 1) {
   return(df_np)
 }
 
-#' helper function to calculate np for one cell line in the gdsc
-#'
-#' @param df dataframe with one cell line + log expression
-#' @param g igraph object containing ppi info
-#'
-#' @return same dataframe with np calculated for each gene.
-#'
-#' @export
-
-calc_np_i <- function(df, g) {
-  #grab expression vector
-  exp <- df$log_expression
-  names(exp) <- df$gene_symbols
-
-  #calc np for that expression vector
-  np <- calc_np_all(exp, g)
-  np_df <- data.frame(gene_symbols = names(np),
-                      np = np)
-
-
-  df <- dplyr::left_join(df, np_df)
-  return(df)
-}
-
 #' function to do in-silico repression for a given gene on all cell lines in the GDSC
 #'
 #' @inheritParams calc_gdsc_np

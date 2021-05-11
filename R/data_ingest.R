@@ -18,7 +18,7 @@ get_gdsc <- function(cache = NULL) {
   exp_df <- get_exp(cache = cache)
 
   #get drug data
-  drug_df <- get_drug()
+  drug_df <- get_dr(cache = cache)
 
   #get metadata
   meta_df <- get_meta(cache = cache)
@@ -53,24 +53,22 @@ get_exp <- function(cache) {
 
 #' helper function to get drug response data
 #'
+#' @inheritParams clean_gdsc
 #'
 #'
-#'
 
-
-get_drug <- function() {
-
-  #download the data
-  url1<- "https://www.cancerrxgene.org/gdsc1000/GDSC1000_WebResources//Data/suppData/TableS4A.xlsx"
-  httr::GET(url1, httr::write_disk(tf <- tempfile(fileext = ".xlsx")))
-
+get_dr <- function(cache) {
+  # check if file has already been downloaded at the provided cache
+  if(!file.exists(paste0(cache, "/gdsc_dr.xlsx"))) {
+    # download file, store in `Data` dir
+    curl::curl_download("ftp://ftp.sanger.ac.uk/pub/project/cancerrxgene/releases/current_release/GDSC2_fitted_dose_response_25Feb20.xlsx",
+                        destfile = paste0(cache, "/gdsc_dr.xlsx"))
+  } else {
+    message("using cached gdsc data")
+  }
   #read into R
-  df <- readxl::read_excel(tf, skip = 5)
-
-  #rename the first 2 columns because of an excel generated parsing error
-  colnames(df)[1:2] <- c("cosmic_identifier", "sample_name")
+  df <- readxl::read_excel(paste0(cache, "/gdsc_dr.xlsx"))
   return(df)
-
 }
 
 #' helper function to get the cell line metadata
@@ -191,22 +189,12 @@ clean_response <- function(df) {
 
   #all but the first two columns (the two identifiers, we want to be numeric)
   df <- df %>%
-    tidyr::pivot_longer(cols = -c(1,2), names_to = "drug", values_to = "IC50") %>%
-    dplyr::mutate(IC50 = as.numeric(.data$IC50),
-                  IC50 = exp(.data$IC50),
-                  IC50 = log2(.data$IC50))
+    dplyr::mutate(log2IC50 = as.numeric(.data$LN_IC50),
+                  log2IC50 = exp(.data$log2IC50),
+                  log2IC50 = log2(.data$log2IC50)) %>%
+    janitor::clean_names()
 
-  z_df <- df %>%
-    dplyr::group_by(drug) %>%
-    dplyr::group_modify(
-      ~data.frame(
-        cosmic_identifier = .x$cosmic_identifier,
-        sample_name = .x$sample_name,
-        IC50 = .x$IC50,
-        z_score = as.numeric(scale(.x$IC50))
-      ), .keep = TRUE)
-
-  return(z_df)
+  return(df)
 }
 
 #' Function to clean expression data from gdsc

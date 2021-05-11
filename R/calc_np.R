@@ -16,10 +16,9 @@ calc_np_all <- function(exp, g, v = as.character(names(igraph::V(g)))) {
 
   # remove any names of exp that are not in the graph.
   exp <- exp[names(exp) %in% vertices]
+
   # need to do the same thing for v (because sometimes there will be neighbors of a given node that aren't in the ppi)
   v <- v[v %in% vertices]
-
-
 
   #get a list of neighbors for each node
   neighbors <-
@@ -30,8 +29,9 @@ calc_np_all <- function(exp, g, v = as.character(names(igraph::V(g)))) {
   #loop over all vertices
   np_vec <- vector(mode = "numeric", length = length(v))
   names(np_vec) <- v
+  vertex_list <- igraph::V(g) #slightly different than "vertices" - used for indexing
   for(i in v) {
-    neighbors_named <- as.character(names(igraph::V(g)[neighbors[[i]]])) #grab named vec of neighbors for each vertex
+    neighbors_named <- as.character(names(vertex_list[neighbors[[i]]])) #grab named vec of neighbors for each vertex
     c_j <- sum(exp[neighbors_named]) #sum up the concentration of all neighbors
     c_i <- exp[i]
     np_vec[i] <- calc_np(c_i = c_i, c_j = c_j)
@@ -46,6 +46,47 @@ calc_np_all <- function(exp, g, v = as.character(names(igraph::V(g)))) {
   return(np_vec)
 }
 
+#' function to calculate the network potential for each protein in a user-provided vector - cpp internal version
+#'
+#' @param exp expression vector - assumed to be a named vector where the values are expression and the names are the gene name
+#' @param g igraph object - will be filtered so that only nodes found in both exp and g are kept
+#' @param v character vector of nodes over which to calculate network potential.
+#' @return dataframe containing network potential for each of the inputed gene names.
+#'
+#' @export
+
+calc_np_all2 <- function(exp, g, v = as.character(names(igraph::V(g)))) {
+
+  #first add expression to the subgraph.
+  g <- add_expression(exp = exp, g = g)
+
+  vertices <- as.character(names(igraph::V(g))) #in most cases this will be the same as `v`
+
+  # remove any names of exp that are not in the graph.
+  exp <- exp[names(exp) %in% vertices]
+
+  # need to do the same thing for v (because sometimes there will be neighbors of a given node that aren't in the ppi)
+  v <- v[v %in% vertices]
+
+  #re-order exp to have the same order as v
+  exp <- exp[v]
+
+  #get a list of neighbors for each node
+  neighbors <-
+    lapply(v,
+           get_neighbors, g = g)
+
+  #run cpp function to do the actual calculation on each node
+  np_vec <- fcalc_np_all(neighbors = neighbors, v = v, exp = exp)
+  #gonna do some data wrangling to get the vertices in the same order as the input expression vector
+  if(length(np_vec) < length(exp)) {
+    exp <- exp[names(exp) %in% names(np_vec)]
+  }
+
+  np_vec <-np_vec[names(exp)]
+
+  return(np_vec)
+}
 
 #' calculate network potential for one node.
 #'
