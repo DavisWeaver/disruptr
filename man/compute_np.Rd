@@ -6,6 +6,7 @@
 \usage{
 compute_np(
   cache = NULL,
+  experiment_name,
   ppi = "biogrid",
   min_score,
   exp_mat,
@@ -15,6 +16,8 @@ compute_np(
 }
 \arguments{
 \item{cache}{user-provided filepath for where to store data etc}
+
+\item{experiment_name}{name of the experiment for saving output.}
 
 \item{ppi}{should we use biogrid or stringdb for the PPI}
 
