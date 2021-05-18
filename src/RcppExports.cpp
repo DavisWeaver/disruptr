@@ -18,22 +18,23 @@ BEGIN_RCPP
 END_RCPP
 }
 // fcalc_np_all
-NumericVector fcalc_np_all(List& neighbors, StringVector& v, NumericVector& exp);
-RcppExport SEXP _disruptr_fcalc_np_all(SEXP neighborsSEXP, SEXP vSEXP, SEXP expSEXP) {
+NumericVector fcalc_np_all(List& neighbors, StringVector& vertices, StringVector& v, NumericVector& exp);
+RcppExport SEXP _disruptr_fcalc_np_all(SEXP neighborsSEXP, SEXP verticesSEXP, SEXP vSEXP, SEXP expSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< List& >::type neighbors(neighborsSEXP);
+    Rcpp::traits::input_parameter< StringVector& >::type vertices(verticesSEXP);
     Rcpp::traits::input_parameter< StringVector& >::type v(vSEXP);
     Rcpp::traits::input_parameter< NumericVector& >::type exp(expSEXP);
-    rcpp_result_gen = Rcpp::wrap(fcalc_np_all(neighbors, v, exp));
+    rcpp_result_gen = Rcpp::wrap(fcalc_np_all(neighbors, vertices, v, exp));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_disruptr_fcalc_np", (DL_FUNC) &_disruptr_fcalc_np, 2},
-    {"_disruptr_fcalc_np_all", (DL_FUNC) &_disruptr_fcalc_np_all, 3},
+    {"_disruptr_fcalc_np_all", (DL_FUNC) &_disruptr_fcalc_np_all, 4},
     {NULL, NULL, 0}
 };
 

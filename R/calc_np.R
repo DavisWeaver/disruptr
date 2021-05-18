@@ -3,11 +3,12 @@
 #' @param exp expression vector - assumed to be a named vector where the values are expression and the names are the gene name
 #' @param g igraph object - will be filtered so that only nodes found in both exp and g are kept
 #' @param v character vector of nodes over which to calculate network potential.
+#' @param neighbors named list containing the neighbors for each node of graph g. If not provided,
+#'        it will be computed
 #' @return dataframe containing network potential for each of the inputed gene names.
 #'
-#' @export
 
-calc_np_all <- function(exp, g, v = as.character(names(igraph::V(g)))) {
+calc_np_all_legacy <- function(exp, g, v = as.character(names(igraph::V(g))), neighbors = NULL) {
 
   #first add expression to the subgraph.
   g <- add_expression(exp = exp, g = g)
@@ -21,11 +22,13 @@ calc_np_all <- function(exp, g, v = as.character(names(igraph::V(g)))) {
   v <- v[v %in% vertices]
 
   #get a list of neighbors for each node
-  neighbors <-
-    lapply(v,
-           get_neighbors, g = g)
-  names(neighbors) <- v
+  if(is.null(neighbors)) {
+    neighbors <-
+      lapply(v,
+             get_neighbors, g = g)
+    names(neighbors) <- v
 
+  }
   #loop over all vertices
   np_vec <- vector(mode = "numeric", length = length(v))
   names(np_vec) <- v
@@ -51,11 +54,14 @@ calc_np_all <- function(exp, g, v = as.character(names(igraph::V(g)))) {
 #' @param exp expression vector - assumed to be a named vector where the values are expression and the names are the gene name
 #' @param g igraph object - will be filtered so that only nodes found in both exp and g are kept
 #' @param v character vector of nodes over which to calculate network potential.
+#' @param neighbors named list containing the neighbors for each node of graph g. If not provided,
+#'        it will be computed
 #' @return dataframe containing network potential for each of the inputed gene names.
 #'
 #' @export
 
-calc_np_all2 <- function(exp, g, v = as.character(names(igraph::V(g)))) {
+calc_np_all <- function(exp, g, v = as.character(names(igraph::V(g))),
+                         neighbors = NULL) {
 
   #first add expression to the subgraph.
   g <- add_expression(exp = exp, g = g)
@@ -66,24 +72,28 @@ calc_np_all2 <- function(exp, g, v = as.character(names(igraph::V(g)))) {
   exp <- exp[names(exp) %in% vertices]
 
   # need to do the same thing for v (because sometimes there will be neighbors of a given node that aren't in the ppi)
+  # actually how is that even possible? leaving it in for now
   v <- v[v %in% vertices]
+  #v we will just use as a logical flag
 
-  #re-order exp to have the same order as v
-  exp <- exp[v]
+  #re-order exp to have the same order as vertices
+  exp <- exp[vertices]
 
-  #get a list of neighbors for each node
-  neighbors <-
-    lapply(v,
-           get_neighbors, g = g)
-
-  #run cpp function to do the actual calculation on each node
-  np_vec <- fcalc_np_all(neighbors = neighbors, v = v, exp = exp)
-  #gonna do some data wrangling to get the vertices in the same order as the input expression vector
-  if(length(np_vec) < length(exp)) {
-    exp <- exp[names(exp) %in% names(np_vec)]
+  if(is.null(neighbors)) {
+    neighbors <-
+      lapply(vertices,
+             get_neighbors, g = g)
+    names(neighbors) <- vertices
+  } else {
+    neighbors <- neighbors[vertices] #index to make sure we don't have any list items we don't need and to make sure they are in the same order as exp and vertices
   }
 
-  np_vec <-np_vec[names(exp)]
+  #run cpp function to do the actual calculation on each node
+  np_vec <- fcalc_np_all(neighbors = neighbors, vertices = vertices, v = v, exp = exp)
+  #gonna do some data wrangling to get the vertices in the same order as the input expression vector
+  # if(length(np_vec) < length(exp)) {
+  #   exp <- exp[names(exp) %in% names(np_vec)]
+  # }
 
   return(np_vec)
 }

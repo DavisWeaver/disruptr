@@ -23,6 +23,11 @@ compute_np <- function(cache = NULL, experiment_name, ppi = "biogrid", min_score
   if(is.null(cache)) {
     stop("please provide a cache for saving and loading data/output")
   }
+  #just return the file if we've already done this
+  if(file.exists(paste0(cache, experiment_name, "np.Rda"))) {
+    load(paste0(cache, experiment_name, "np.Rda"))
+    return(df_np)
+  }
   #load ppi
   if(ppi == "biogrid") {
     g <- crosstalkr::prep_biogrid(cache = cache)
@@ -41,6 +46,7 @@ compute_np <- function(cache = NULL, experiment_name, ppi = "biogrid", min_score
 
 
   samples <- unique(df$sample_name)
+
   #set up parallel execution
   cl <- parallel::makeCluster(ncores)
   doParallel::registerDoParallel(cl)
@@ -65,6 +71,64 @@ compute_np <- function(cache = NULL, experiment_name, ppi = "biogrid", min_score
   return(df_np)
 
 
+}
+
+#' main function to compute delta np for every gene in a given dataframe - assumes compute_np has already been run for a given dataset
+#'
+#' This function takes a tidy dataframe as input containing RNA sequencing data for one or more samples and conducts in-silico repression.
+#' Make sure to run with the same arguments for ppi and cache to maintain consistency for a given pipeline.
+#'
+#' @inheritParams compute_np
+#' @param df dataframe output of compute_np
+#'
+#' @export
+
+compute_dnp <- function(cache = NULL, df, experiment_name, ppi, ncores = 1) {
+
+  if(is.null(cache)) {
+    stop("please provide a cache for saving and loading data/output")
+  }
+
+  #just return if we have done this before
+  if(file.exists(paste0(cache, experiment_name, "dnp.Rda"))) {
+    load(paste0(cache, experiment_name, "dnp.Rda"))
+    return(df_np)
+  }
+  #load ppi
+  if(ppi == "biogrid") {
+    g <- crosstalkr::prep_biogrid(cache = cache)
+  } else if (ppi == "stringdb") {
+    g <- crosstalkr::prep_stringdb(cache = cache, min_score = min_score)
+  } else {
+    stop("ppi must be either 'biogrid' or 'stringdb'")
+  }
+
+  #lose any NAs for network potential
+  df <- dplyr::filter(df, !is.na(np))
+
+  samples <- unique(df$sample_name)
+
+  #set up parallel execution
+  cl <- parallel::makeCluster(ncores)
+  doParallel::registerDoParallel(cl)
+  out_list <-
+    foreach::foreach(i = 1:length(samples)) %dopar% {
+      #isolate one cell line
+      df_i <- df %>%
+        dplyr::filter(sample_name == samples[i])
+
+      #add dnp to df_i for that cell line
+      disruptr::calc_dnp_i(df_i, g = g)
+
+    }
+  #close out parallel execution
+  parallel::stopCluster(cl)
+
+  df_dnp = dplyr::bind_rows(out_list)
+
+  save(df_dnp, file = paste0(cache, experiment_name, "dnp.Rda"))
+
+  return(df_dnp)
 }
 
 #' helper function to convert expression matrix to tidy dataframe (if not already)
@@ -131,7 +195,7 @@ calc_np_i <- function(df, g) {
   names(exp) <- df[,1] #this will break if gene name is not the first column
 
   #calc np for that expression vector- use cpp internal version
-  np <- calc_np_all2(exp, g)
+  np <- calc_np_all(exp, g)
 
   #gene_name must be how we label this columns
   np_df <- data.frame(gene_name = names(np),
@@ -139,5 +203,29 @@ calc_np_i <- function(df, g) {
 
 
   df <- dplyr::left_join(df, np_df)
+  return(df)
+}
+
+#' helper function to calculate dnp for one sample
+#'
+#' @param df dataframe with one cell line + log expression
+#' @param g igraph object containing ppi info
+#'
+#' @return same dataframe with dnp calculated for each gene.
+#'
+#' @export
+
+calc_dnp_i <- function(df, g) {
+  exp <- df$expression
+  names(exp) <- df[,1]
+  dnp_mat <- node_repression(g = g, v_rm = names(exp), exp= exp)
+
+  #sum everything
+  dnp <- Matrix::colSums(dnp_mat)
+
+  #add to dataframe and then join with df
+  dnp_df <- data.frame(gene_name = names(dnp), dnp = dnp)
+
+  df <- dplyr::left_join(df, dnp_df)
   return(df)
 }

@@ -5,7 +5,14 @@ fcalc_np <- function(c_i, c_j) {
     .Call(`_disruptr_fcalc_np`, c_i, c_j)
 }
 
-fcalc_np_all <- function(neighbors, v, exp) {
-    .Call(`_disruptr_fcalc_np_all`, neighbors, v, exp)
+#' Function to calculate the network potential for vertices v
+#'
+#' @param neighbors list of neighbors for every node in the graph, type Rcpp::list
+#' @param vertices node list for graph, type Rcpp::StringVector
+#' @param v list of nodes for which we plan to calculate network potential
+#' @param exp named vector of expression for each node in vertices
+#'
+fcalc_np_all <- function(neighbors, vertices, v, exp) {
+    .Call(`_disruptr_fcalc_np_all`, neighbors, vertices, v, exp)
 }
 

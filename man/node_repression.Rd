@@ -7,6 +7,7 @@
 node_repression(
   g,
   v_rm,
+  exp,
   state_function = calc_np_all,
   neighbors_only = TRUE,
   ...
