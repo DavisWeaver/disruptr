@@ -142,7 +142,7 @@ compute_dnp <- function(cache = NULL, df, experiment_name, ppi, ncores = 1) {
 tidy_expression <- function(df) {
 
   ##label the first column as gene name
-  if(is.character(df[,1])) {
+  if(is.character(unlist(df[,1]))) {
     colnames(df)[1] <- "gene_name"
   } else if(is.character(rownames(df))) {
     df$gene_name <- rownames(df)
