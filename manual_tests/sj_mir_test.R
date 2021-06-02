@@ -2,7 +2,7 @@ library(disruptr)
 library(dplyr)
 library(tidyr)
 library(magrittr)
-cache = "G:/My Drive/MIR_Combo_Targeting/code/miRNA_Targeting/data_files/"
+cache = "C:/Users/Install/Documents/miRNA_targeting/data_files/"
 
 g <- crosstalkr::prep_biogrid(cache = cache)
 #isolate a single
@@ -13,4 +13,4 @@ jude_df <- pivot_wider(jude_df, id_cols = Geneid, names_from = sample_name,
                        values_from = log_count)
 
 jude_dfnp <- compute_np(cache = cache, experiment_name = "sj", ppi = "biogrid",
-                        exp_mat= jude_df, ncores = 4)
+                        exp_mat= jude_df, mir_paper = FALSE, ncores = 4)

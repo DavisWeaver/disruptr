@@ -192,7 +192,7 @@ experiment_breakout <- function(df) {
 calc_np_i <- function(df, g) {
   #grab expression vector
   exp <- df$expression
-  names(exp) <- df[,1] #this will break if gene name is not the first column
+  names(exp) <- unlist(df[,1]) #this will break if gene name is not the first column
 
   #calc np for that expression vector- use cpp internal version
   np <- calc_np_all(exp, g)
@@ -217,7 +217,7 @@ calc_np_i <- function(df, g) {
 
 calc_dnp_i <- function(df, g) {
   exp <- df$expression
-  names(exp) <- df[,1]
+  names(exp) <- unlist(df[,1])
   dnp_mat <- node_repression(g = g, v_rm = names(exp), exp= exp)
 
   #sum everything
