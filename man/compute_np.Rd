@@ -8,7 +8,7 @@ compute_np(
   cache = NULL,
   experiment_name,
   ppi = "biogrid",
-  min_score,
+  min_score = NULL,
   exp_mat,
   mir_paper = TRUE,
   ncores = 1

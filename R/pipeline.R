@@ -13,11 +13,12 @@
 #' @return tidy data frame with one column for expression and another for np
 #'
 #' @importFrom magrittr %>%
+#' @importFrom foreach %dopar%
 #' @export
 #'
 #'
 
-compute_np <- function(cache = NULL, experiment_name, ppi = "biogrid", min_score,
+compute_np <- function(cache = NULL, experiment_name, ppi = "biogrid", min_score = NULL,
                        exp_mat, mir_paper = TRUE, ncores = 1) {
 
   if(is.null(cache)) {
@@ -29,13 +30,7 @@ compute_np <- function(cache = NULL, experiment_name, ppi = "biogrid", min_score
     return(df_np)
   }
   #load ppi
-  if(ppi == "biogrid") {
-    g <- crosstalkr::prep_biogrid(cache = cache)
-  } else if (ppi == "stringdb") {
-    g <- crosstalkr::prep_stringdb(cache = cache, min_score = min_score)
-  } else {
-    stop("ppi must be either 'biogrid' or 'stringdb'")
-  }
+  g <- load_ppi(cache = cache, min_score = min_score, ppi = ppi)
 
   #convert expression matrix to tidy data frame + do some cleaning
   df <- tidy_expression(exp_mat)
@@ -80,10 +75,12 @@ compute_np <- function(cache = NULL, experiment_name, ppi = "biogrid", min_score
 #'
 #' @inheritParams compute_np
 #' @param df dataframe output of compute_np
-#'
+#' @importFrom magrittr %>%
+#' @importFrom foreach %dopar%
 #' @export
 
-compute_dnp <- function(cache = NULL, df, experiment_name, ppi, ncores = 1) {
+compute_dnp <- function(cache = NULL, df, experiment_name, ppi, ncores = 1,
+                        min_score= NULL) {
 
   if(is.null(cache)) {
     stop("please provide a cache for saving and loading data/output")
@@ -92,16 +89,10 @@ compute_dnp <- function(cache = NULL, df, experiment_name, ppi, ncores = 1) {
   #just return if we have done this before
   if(file.exists(paste0(cache, experiment_name, "dnp.Rda"))) {
     load(paste0(cache, experiment_name, "dnp.Rda"))
-    return(df_np)
+    return(df_dnp)
   }
   #load ppi
-  if(ppi == "biogrid") {
-    g <- crosstalkr::prep_biogrid(cache = cache)
-  } else if (ppi == "stringdb") {
-    g <- crosstalkr::prep_stringdb(cache = cache, min_score = min_score)
-  } else {
-    stop("ppi must be either 'biogrid' or 'stringdb'")
-  }
+  g <- load_ppi(cache = cache, min_score = min_score, ppi = ppi)
 
   #lose any NAs for network potential
   df <- dplyr::filter(df, !is.na(np))
@@ -130,6 +121,24 @@ compute_dnp <- function(cache = NULL, df, experiment_name, ppi, ncores = 1) {
 
   return(df_dnp)
 }
+
+
+
+#' load ppi using crosstalkr imported functions
+#'
+#' @inheritParams compute_np
+
+load_ppi <- function(cache, min_score, ppi) {
+  if(ppi == "biogrid") {
+    g <- crosstalkr::prep_biogrid(cache = cache)
+  } else if (ppi == "stringdb") {
+    g <- crosstalkr::prep_stringdb(cache = cache, min_score = min_score)
+  } else {
+    stop("ppi must be either 'biogrid' or 'stringdb'")
+  }
+  return(g)
+}
+
 
 #' helper function to convert expression matrix to tidy dataframe (if not already)
 #'
@@ -201,7 +210,6 @@ calc_np_i <- function(df, g) {
   np_df <- data.frame(gene_name = names(np),
                       np = np)
 
-
   df <- dplyr::left_join(df, np_df)
   return(df)
 }
@@ -218,6 +226,7 @@ calc_np_i <- function(df, g) {
 calc_dnp_i <- function(df, g) {
   exp <- df$expression
   names(exp) <- unlist(df[,1])
+
   dnp_mat <- node_repression(g = g, v_rm = names(exp), exp= exp)
 
   #sum everything

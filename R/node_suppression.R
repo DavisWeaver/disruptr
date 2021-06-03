@@ -18,7 +18,8 @@ node_repression <- function(g, v_rm, exp, state_function = calc_np_all,
   #grab all vertices of g
   vertices <- as.character(names(igraph::V(g)))
 
-
+  #limit v_rm to those present in vertices
+  v_rm <- v_rm[v_rm %in% vertices]
 
   #Get a list of neighbors in the graph - this will speed things up a lot if we are suppressing tons of nodes simultaneously
   neighbors_all <- lapply(vertices,

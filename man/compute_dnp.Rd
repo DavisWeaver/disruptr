@@ -4,7 +4,14 @@
 \alias{compute_dnp}
 \title{main function to compute delta np for every gene in a given dataframe - assumes compute_np has already been run for a given dataset}
 \usage{
-compute_dnp(cache = NULL, df, experiment_name, ppi, ncores = 1)
+compute_dnp(
+  cache = NULL,
+  df,
+  experiment_name,
+  ppi,
+  ncores = 1,
+  min_score = NULL
+)
 }
 \arguments{
 \item{cache}{user-provided filepath for where to store data etc}
@@ -16,6 +23,8 @@ compute_dnp(cache = NULL, df, experiment_name, ppi, ncores = 1)
 \item{ppi}{should we use biogrid or stringdb for the PPI}
 
 \item{ncores}{number of cores to use for calculations}
+
+\item{min_score}{if ppi is stringdb, which mininum score should we use to filter edges?}
 }
 \description{
 This function takes a tidy dataframe as input containing RNA sequencing data for one or more samples and conducts in-silico repression.

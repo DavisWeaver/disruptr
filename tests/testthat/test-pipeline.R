@@ -1,5 +1,5 @@
 #library(disruptr)
-df <- read.csv(system.file("test_data/rld_Counts.csv", package = "disruptr"))
+# df <- read.csv(system.file("test_data/rld_Counts.csv", package = "disruptr"))
 # df_small <- dplyr::slice_sample(df, prop = 0.02)
 #
 # test1 <- disruptr::compute_np(cache = "G:/My Drive/data/mir_paper/", exp_mat = df_small,
@@ -13,5 +13,4 @@ df <- read.csv(system.file("test_data/rld_Counts.csv", package = "disruptr"))
 
 #Load df_np from previous step
 
-df_np <- compute_np(cache = "G:/My Drive/data/mir_paper/",
-                    exp_mat = df, experiment_name = "EWS_NP", mir_paper = TRUE)
+

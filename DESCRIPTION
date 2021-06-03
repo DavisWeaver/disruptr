@@ -22,7 +22,10 @@ Imports:
     httr,
     readxl,
     janitor,
-    Rcpp
+    Rcpp, 
+    foreach,
+    doParallel,
+    parallel
 LinkingTo: 
     Rcpp
 Encoding: UTF-8
