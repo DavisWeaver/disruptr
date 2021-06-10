@@ -4,12 +4,16 @@
 \alias{calc_dnp_i}
 \title{helper function to calculate dnp for one sample}
 \usage{
-calc_dnp_i(df, g)
+calc_dnp_i(df, g, v_rm = NULL, keep_all = TRUE)
 }
 \arguments{
 \item{df}{dataframe with one cell line + log expression}
 
 \item{g}{igraph object containing ppi info}
+
+\item{v_rm}{passed to \code{\link[=node_repression]{node_repression()}}}
+
+\item{keep_all}{logical flag denoting if we should keep genes that we didn't calculate dnp for}
 }
 \value{
 same dataframe with dnp calculated for each gene.

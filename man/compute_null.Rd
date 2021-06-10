@@ -9,10 +9,9 @@ compute_null(
   df,
   ppi = "biogrid",
   n,
-  all_samples = FALSE,
-  v = NULL,
+  n_genes = 50,
   experiment_name,
-  ncores = 1
+  ncores = 4
 )
 }
 \arguments{
@@ -24,16 +23,15 @@ compute_null(
 
 \item{n}{number of permutations}
 
-\item{all_samples}{default behavior is to compute the null distribution for
-just one sample in the data due to computational expense. Set to true to compute for
-all samples}
-
-\item{v}{character vector of protein names that we will compute the null
-distribution for, defaults to all}
+\item{n_genes}{integer describing number of genes per sample that we will compute the null distribution for}
 
 \item{experiment_name}{name of the experiment for saving output.}
 
 \item{ncores}{number of cores to use for calculations}
+
+\item{v}{character vector of protein names that we will compute the null
+distribution for, defaults to the top 50, as ranked by change in network potential from
+previous steps in the pipeline. Change n_genes parameter to compute for more or less}
 }
 \description{
 \verb{compute null} calculates a null distribution for the change in network potential for

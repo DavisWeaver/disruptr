@@ -218,16 +218,21 @@ calc_np_i <- function(df, g) {
 #'
 #' @param df dataframe with one cell line + log expression
 #' @param g igraph object containing ppi info
+#' @param v_rm passed to [node_repression()]
+#' @param keep_all logical flag denoting if we should keep genes that we didn't calculate dnp for
 #'
 #' @return same dataframe with dnp calculated for each gene.
 #'
 #' @export
 
-calc_dnp_i <- function(df, g) {
+calc_dnp_i <- function(df, g, v_rm = NULL, keep_all = TRUE) {
   exp <- df$expression
   names(exp) <- unlist(df[,1])
 
-  dnp_mat <- node_repression(g = g, v_rm = names(exp), exp= exp)
+  if(is.null(v_rm)) {
+    v_rm = names(exp)
+  }
+  dnp_mat <- node_repression(g = g, v_rm = v_rm, exp= exp)
 
   #sum everything
   dnp <- Matrix::colSums(dnp_mat)
@@ -235,6 +240,12 @@ calc_dnp_i <- function(df, g) {
   #add to dataframe and then join with df
   dnp_df <- data.frame(gene_name = names(dnp), dnp = dnp)
 
-  df <- dplyr::left_join(df, dnp_df)
+  if(keep_all == FALSE) {
+    df <- dplyr::filter(df, gene_name %in% v_rm)
+  }
+
+  df <- dplyr::left_join(df, dnp_df, by = "gene_name")
+  df <- dplyr::mutate(df, dnp = ifelse(is.na(.data$dnp), 0, .data$dnp))
+
   return(df)
 }

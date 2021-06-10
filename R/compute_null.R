@@ -28,8 +28,8 @@
 #'
 #' @export
 
-compute_null <- function(cache = NULL, df, ppi = "biogrid", n, all_genes = FALSE,
-                         n_genes = 50, experiment_name, ncores = 1) {
+compute_null <- function(cache = NULL, df, ppi = "biogrid", n,
+                         n_genes = 50, experiment_name, ncores = 4) {
   if(is.null(cache)) {
     stop("please provide a cache for saving and loading data/output")
   }
@@ -45,7 +45,7 @@ compute_null <- function(cache = NULL, df, ppi = "biogrid", n, all_genes = FALSE
   samples <- unique(df$sample_name)
 
   #grab top n genes per sample to iterate over
-  v_list = get_topn(df =df, n_genes = n_genes)
+  v_df = get_topn(df =df, n_genes = n_genes)
 
   #get rid of dnp
   df <- df %>% dplyr::select(-dnp)
@@ -55,8 +55,13 @@ compute_null <- function(cache = NULL, df, ppi = "biogrid", n, all_genes = FALSE
 
   cl <- parallel::makeCluster(ncores)
   doParallel::registerDoParallel(cl)
-  out <-
-    foreach::foreach(j = iterators::iter(df_list), .packages = "disruptr") %dopar% {
+  null_df <-
+    foreach::foreach(j = iterators::iter(df_list),
+                     .packages = "disruptr", .combine = "rbind") %dopar%
+    {
+      #get the info on the top genes for a given sample
+      j_sample <- j$sample_name[1]
+      v_j <- v_df[,j_sample][[1]][[1]] #Indexing is gross but this just grabs the top 50 genes for a given sample
       cell_line_df <-
         foreach::foreach(i = 1:n, .combine = "rbind", .packages = "disruptr") %do%
         {
@@ -64,18 +69,27 @@ compute_null <- function(cache = NULL, df, ppi = "biogrid", n, all_genes = FALSE
           g_i <- get_random_graph(g)
 
           #calc change in network potential
-          dnp_ij <- calc_dnp_i(j, g_i)
+          dnp_ij <- calc_dnp_i(j, g_i, v_rm = v_j, keep_all = FALSE)
           dnp_ij$i = i
           return(dnp_ij)
         }
+      null_j_df <- cell_line_df %>%
+        dplyr::group_by(gene_name, sample_name) %>%
+        dplyr::summarise(mean_dnp = mean(.data$np),
+                         sd_dnp = sd(.data$dnp),
+                         n = dplyr::n())
+      return(null_j_df)
 
     }
 
   #close out parallel execution
   parallel::stopCluster(cl)
 
+  #save
+  save(null_df, file = paste0(cache, experiment_name, "dnpNull.Rda"))
 
-
+  #return
+  return(null_df)
 }
 
 #' Helper function for compute_null - returns a graph with randomly permuted edges.
@@ -87,7 +101,7 @@ compute_null <- function(cache = NULL, df, ppi = "biogrid", n, all_genes = FALSE
 #' @seealso [igraph::rewire()]
 
 get_random_graph <- function(g) {
-  g2 <- igraph::rewire(g, igraph::keeping_degseq(niter = igraph::vcount(g)*10))
+  g2 <- igraph::rewire(g, igraph::keeping_degseq(niter = igraph::vcount(g)*100))
   return(g2)
 }
 
@@ -99,5 +113,7 @@ get_topn <- function(df, n_genes) {
   df %>% dplyr::group_by(.data$sample_name) %>%
     dplyr::slice_max(order_by = .data$dnp, n = n_genes) %>%
     dplyr::select(.data$gene_name, .data$sample_name) %>%
-    dplyr::group_split()
+    tidyr::pivot_wider(names_from = .data$sample_name,
+                       values_from = .data$gene_name,
+                       values_fn = list)
 }
