@@ -151,6 +151,9 @@ load_ppi <- function(cache, min_score, ppi) {
 tidy_expression <- function(df) {
 
   ##label the first column as gene name
+  if(is.factor(unlist(df[,1]))) {
+    df[,1] <- as.character(df[,1])
+  }
   if(is.character(unlist(df[,1]))) {
     colnames(df)[1] <- "gene_name"
   } else if(is.character(rownames(df))) {
