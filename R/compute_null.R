@@ -23,7 +23,7 @@
 #' @param n_genes integer describing number of genes per sample that we will compute the null distribution for
 #' @inheritParams compute_dnp
 #'
-#' @importFrom foreach %dopar% %:% %do%
+#' @importFrom foreach %dopar% %do%
 #' @importFrom magrittr %>%
 #'
 #' @export
@@ -36,7 +36,7 @@ compute_null <- function(cache = NULL, df, ppi = "biogrid", n,
   #just return the file if we've already done this
   if(file.exists(paste0(cache, experiment_name, "dnpNull.Rda"))) {
     load(paste0(cache, experiment_name, "dnpNull.Rda"))
-    return(df_np)
+    return(null_df)
   }
 
   #load ppi
