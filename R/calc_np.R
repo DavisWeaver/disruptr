@@ -134,7 +134,7 @@ add_expression <- function(exp, g) {
 
 #' function to get graph neighbors (along with their expression values) for a given gene in a given network g
 #'
-#' just a wrapper around \code{\link{igraph::neighbors}} for convenience
+#' just a wrapper around [igraph::neighbors()] for convenience
 #'
 #' @param gene gene to grab neighbors from.
 #' @inheritParams calc_np_all

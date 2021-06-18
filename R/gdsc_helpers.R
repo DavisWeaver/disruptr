@@ -1,6 +1,6 @@
 #' function to calculate network potential for every gene/cell line combo in the GDSC
 #'
-#' @param cache
+#' @inheritParams compute_np
 #'
 #' @importFrom foreach %dopar%
 #' @importFrom magrittr %>%
@@ -36,7 +36,7 @@ calc_gdsc_np <- function(cache = NULL, ncores = 1) {
     foreach::foreach(i = 1:length(cell_lines)) %dopar% {
       #isolate one cell line
       df_i <- df_exp %>%
-        dplyr::filter(cell_line == cell_lines[i])
+        dplyr::filter(.data$cell_line == cell_lines[i])
 
       #add np to df_i for that cell line
       disruptr::calc_np_i(df_i, g = g)
@@ -125,7 +125,7 @@ GDSC_repress <- function(cache = NULL, v_rm = "EGFR", ncores = 1) {
 #' @export
 
 calc_exp <- function(df, cell_lines, i) {
-  df_i <- dplyr::filter(df, cell_line == cell_lines[i])
+  df_i <- dplyr::filter(df, .data$cell_line == cell_lines[i])
   exp <- df_i$log_expression
   names(exp) <- df_i$gene_symbols
   return(exp)
@@ -134,19 +134,20 @@ calc_exp <- function(df, cell_lines, i) {
 #' helper function to bind the repression vector to df_i in gdsc_repress
 #'
 #' @inheritParams calc_exp
-#' @param repression_vector
+#' @param v_rm which node should we remove?
+#' @param repression_vector output of node_repression function in gdsc_repress
 #'
 #' @export
 
 bind_repression <- function(df, cell_lines, i, repression_vector, v_rm) {
-  df_i <- dplyr::filter(df, cell_line == cell_lines[i])
+  df_i <- dplyr::filter(df, .data$cell_line == cell_lines[i])
   df_repression <- data.frame(gene_symbols = names(repression_vector),
                               np_diff = repression_vector)
 
   df_i <- dplyr::left_join(df_i, df_repression)
   df_i <- dplyr::mutate(df_i,
-                        np_diff = ifelse(gene_symbols == v_rm, abs(np), np_diff),
-                        np_diff = ifelse(is.na(np_diff), 0, np_diff))
+                        np_diff = ifelse(.data$gene_symbols == v_rm, abs(.data$np), .data$np_diff),
+                        np_diff = ifelse(is.na(.data$np_diff), 0, .data$np_diff))
   return(df_i)
 
 }
@@ -164,17 +165,17 @@ bind_repression <- function(df, cell_lines, i, repression_vector, v_rm) {
 
 clean_output <- function(df) {
   df <- df %>%
-    dplyr::filter(!is.na(np),
-                  !is.infinite(np)) %>%
-    dplyr::group_by(cell_line) %>%
+    dplyr::filter(!is.na(.data$np),
+                  !is.infinite(.data$np)) %>%
+    dplyr::group_by(.data$cell_line) %>%
     dplyr::summarise(total_np = sum(.data$np),
                      diff_np = sum(.data$np_diff),
                      egfr_exp = sum(ifelse(
-                       gene_symbols == 'EGFR',
+                       .data$gene_symbols == 'EGFR',
                        .data$log_expression,
                        0)),
                      egfr_np = sum(ifelse(
-                       gene_symbols == 'EGFR',
+                       .data$gene_symbols == 'EGFR',
                        .data$np,
                        0))) %>%
     dplyr::mutate(diff_np_scaled = .data$diff_np/.data$total_np)

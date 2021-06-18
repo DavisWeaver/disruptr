@@ -11,7 +11,8 @@ compute_null(
   n,
   n_genes = 50,
   experiment_name,
-  ncores = 4
+  ncores = 4,
+  min_score = NULL
 )
 }
 \arguments{
@@ -29,9 +30,7 @@ compute_null(
 
 \item{ncores}{number of cores to use for calculations}
 
-\item{v}{character vector of protein names that we will compute the null
-distribution for, defaults to the top 50, as ranked by change in network potential from
-previous steps in the pipeline. Change n_genes parameter to compute for more or less}
+\item{min_score}{if ppi is stringdb, which mininum score should we use to filter edges?}
 }
 \description{
 \verb{compute null} calculates a null distribution for the change in network potential for

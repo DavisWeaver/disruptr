@@ -166,7 +166,7 @@ clean_meta <- function(df) {
   #Add a variable for if the cell line is epithelial in nature.
   df <-  dplyr::mutate(df,
                        epi_origin = ifelse(
-                         gdsc_tissue_descriptor_2 %in% gdsc_interest,
+                         .data$gdsc_tissue_descriptor_2 %in% gdsc_interest,
                          TRUE,
                          FALSE
                        ))
@@ -227,7 +227,7 @@ clean_expression <- function(df) {
 clean_dna <- function(df) {
   df <- df %>%
     janitor::clean_names() %>%
-    dplyr::rename(cell_line = cosmic_id)
+    dplyr::rename(cell_line = .data$cosmic_id)
   return(df)
 }
 

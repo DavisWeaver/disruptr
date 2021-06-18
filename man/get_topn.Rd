@@ -6,6 +6,11 @@
 \usage{
 get_topn(df, n_genes)
 }
+\arguments{
+\item{df}{output of \code{\link[=compute_dnp]{compute_dnp()}}}
+
+\item{n_genes}{integer describing number of genes per sample that we will compute the null distribution for}
+}
 \description{
 Helper function for compute_null - returns the top n genes by dnp for each sample
 }

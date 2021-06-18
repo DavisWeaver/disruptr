@@ -14,6 +14,8 @@
 #'
 #' @importFrom magrittr %>%
 #' @importFrom foreach %dopar%
+#' @importFrom stats sd
+#' @importFrom utils download.file unzip
 #' @export
 #'
 #'
@@ -49,7 +51,7 @@ compute_np <- function(cache = NULL, experiment_name, ppi = "biogrid", min_score
     foreach::foreach(i = 1:length(samples)) %dopar% {
       #isolate one cell line
       df_i <- df %>%
-        dplyr::filter(sample_name == samples[i])
+        dplyr::filter(.data$sample_name == samples[i])
 
 
 
@@ -95,7 +97,7 @@ compute_dnp <- function(cache = NULL, df, experiment_name, ppi, ncores = 1,
   g <- load_ppi(cache = cache, min_score = min_score, ppi = ppi)
 
   #lose any NAs for network potential
-  df <- dplyr::filter(df, !is.na(np))
+  df <- dplyr::filter(df, !is.na(.data$np))
 
   samples <- unique(df$sample_name)
 
@@ -106,7 +108,7 @@ compute_dnp <- function(cache = NULL, df, experiment_name, ppi, ncores = 1,
     foreach::foreach(i = 1:length(samples)) %dopar% {
       #isolate one cell line
       df_i <- df %>%
-        dplyr::filter(sample_name == samples[i])
+        dplyr::filter(.data$sample_name == samples[i])
 
       #add dnp to df_i for that cell line
       disruptr::calc_dnp_i(df_i, g = g)
@@ -142,7 +144,7 @@ load_ppi <- function(cache, min_score, ppi) {
 
 #' helper function to convert expression matrix to tidy dataframe (if not already)
 #'
-#' @inheritParams compute_np
+#' @param df dataframe
 #'
 #' @importFrom magrittr %>%
 #'
@@ -244,7 +246,7 @@ calc_dnp_i <- function(df, g, v_rm = NULL, keep_all = TRUE) {
   dnp_df <- data.frame(gene_name = names(dnp), dnp = dnp)
 
   if(keep_all == FALSE) {
-    df <- dplyr::filter(df, gene_name %in% v_rm)
+    df <- dplyr::filter(df, .data$gene_name %in% v_rm)
   }
 
   df <- dplyr::left_join(df, dnp_df, by = "gene_name")
@@ -252,3 +254,7 @@ calc_dnp_i <- function(df, g, v_rm = NULL, keep_all = TRUE) {
 
   return(df)
 }
+
+#bad: gonna define a bunch of globals to avoid the dreaded R cmd check notes
+
+globalVariables(c("i", "j"))

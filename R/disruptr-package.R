@@ -1,3 +1,4 @@
+#' @importFrom rlang .data
 ## usethis namespace: start
 #' @useDynLib disruptr, .registration = TRUE
 ## usethis namespace: end
@@ -7,3 +8,4 @@ NULL
 #' @importFrom Rcpp sourceCpp
 ## usethis namespace: end
 NULL
+

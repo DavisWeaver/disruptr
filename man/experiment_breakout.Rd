@@ -6,6 +6,9 @@
 \usage{
 experiment_breakout(df)
 }
+\arguments{
+\item{df}{dataframe}
+}
 \description{
 this is highly specific  to the miR paper
 }

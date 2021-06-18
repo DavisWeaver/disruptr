@@ -7,7 +7,9 @@
 calc_gdsc_np(cache = NULL, ncores = 1)
 }
 \arguments{
-\item{cache}{}
+\item{cache}{user-provided filepath for where to store data etc}
+
+\item{ncores}{number of cores to use for calculations}
 }
 \description{
 function to calculate network potential for every gene/cell line combo in the GDSC

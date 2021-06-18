@@ -10,11 +10,13 @@ names(expected_np) <- seeds
 
 g <- igraph::induced_subgraph(g, seeds)
 
+testnp <- calc_np_all(g = g, exp = toy_exp)
+testnp <- testnp[names(expected_np)]
 
 test_that("calc_np_all returns expected output", {
  expect_lte(length(calc_np_all(toy_exp, g)), length(toy_exp))
  expect_true(is.numeric(calc_np_all(toy_exp,g)))
- expect_equal(calc_np_all(g = g, exp = toy_exp), expected_np, tolerance = 0.1)
+ expect_equal(testnp, expected_np, tolerance = 0.1)
 })
 
 
@@ -22,15 +24,19 @@ g_new <- igraph::delete.vertices(g, "JAG1")
 seeds_new <- seeds[seeds != "JAG1"]
 expected_np_new <- c(15.67, 1.39, Inf, -0.86, -1.38)
 names(expected_np_new) <- seeds_new
+testnp <- calc_np_all(g = g_new, exp = toy_exp)
+testnp <- testnp[names(expected_np_new)]
 
 test_that("calc_np_all works with different length arguments", {
-expect_equal(calc_np_all(g = g_new, exp = toy_exp), expected_np_new, tolerance = 0.1)
+expect_equal(testnp, expected_np_new, tolerance = 0.1)
 })
 
-expected_np <- c(-0.94, -2.23, -1.38)
-names(expected_np) <- c("ITGAV", "JAG1", "APOH")
+expected_np <- c(15.67, -4.81, Inf,0,0,0)
+names(expected_np) <- seeds
+testnp <- calc_np_all(g = g, exp = toy_exp, v = c("OLR1", "APP", "VAV2"))
+testnp <- testnp[names(expected_np)]
 test_that("calc_np_all can process subsets of a graph", {
-  expect_equal(calc_np_all(g = g, exp = toy_exp, v = c("ITGAV", "JAG1", "APOH")),
+  expect_equal(testnp,
                expected = expected_np, tolerance = 0.1)
 })
 

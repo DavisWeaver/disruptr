@@ -17,9 +17,6 @@
 #'
 #' @param df output of [compute_dnp()]
 #' @param n number of permutations
-#' @param v character vector of protein names that we will compute the null
-#'     distribution for, defaults to the top 50, as ranked by change in network potential from
-#'     previous steps in the pipeline. Change n_genes parameter to compute for more or less
 #' @param n_genes integer describing number of genes per sample that we will compute the null distribution for
 #' @inheritParams compute_dnp
 #'
@@ -29,7 +26,8 @@
 #' @export
 
 compute_null <- function(cache = NULL, df, ppi = "biogrid", n,
-                         n_genes = 50, experiment_name, ncores = 4) {
+                         n_genes = 50, experiment_name, ncores = 4,
+                         min_score = NULL) {
   if(is.null(cache)) {
     stop("please provide a cache for saving and loading data/output")
   }
@@ -48,7 +46,7 @@ compute_null <- function(cache = NULL, df, ppi = "biogrid", n,
   v_df = get_topn(df =df, n_genes = n_genes)
 
   #get rid of dnp
-  df <- df %>% dplyr::select(-dnp)
+  df <- df %>% dplyr::select(-.data$dnp)
   #do we want to do a grouped split on sample and then iterate directly through the list? probably
   df_list <- df %>% dplyr::group_by(.data$sample_name) %>%
     dplyr::group_split()
@@ -74,7 +72,7 @@ compute_null <- function(cache = NULL, df, ppi = "biogrid", n,
           return(dnp_ij)
         }
       null_j_df <- cell_line_df %>%
-        dplyr::group_by(gene_name, sample_name) %>%
+        dplyr::group_by(.data$gene_name, .data$sample_name) %>%
         dplyr::summarise(mean_dnp = mean(.data$np),
                          sd_dnp = sd(.data$dnp),
                          n = dplyr::n())
@@ -99,6 +97,7 @@ compute_null <- function(cache = NULL, df, ppi = "biogrid", n,
 #' @param g graph to be permuted
 #'
 #' @seealso [igraph::rewire()]
+#' @export
 
 get_random_graph <- function(g) {
   g2 <- igraph::rewire(g, igraph::keeping_degseq(niter = igraph::vcount(g)*100))
@@ -106,7 +105,7 @@ get_random_graph <- function(g) {
 }
 
 #' Helper function for compute_null - returns the top n genes by dnp for each sample
-#'
+#' @inheritParams compute_null
 #' @importFrom magrittr %>%
 
 get_topn <- function(df, n_genes) {

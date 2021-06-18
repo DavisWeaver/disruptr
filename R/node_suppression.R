@@ -4,6 +4,7 @@
 #'
 #' @param g igraph network object
 #' @param v_rm index of vertices to remove
+#' @param exp expression vector for nodes in graph g
 #' @param state_function function to use to calculate network state before and after node_repression
 #' @param neighbors_only logical designating whether state function should be calculated for all nodes or just neighbors
 #' @param ... additional parameters passed to state function.

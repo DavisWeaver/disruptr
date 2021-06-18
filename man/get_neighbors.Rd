@@ -15,5 +15,5 @@ get_neighbors(gene, g)
 named numeric vector.
 }
 \description{
-just a wrapper around \code{\link{igraph::neighbors}} for convenience
+just a wrapper around \code{\link[igraph:neighbors]{igraph::neighbors()}} for convenience
 }

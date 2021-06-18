@@ -7,9 +7,11 @@
 GDSC_repress(cache = NULL, v_rm = "EGFR", ncores = 1)
 }
 \arguments{
-\item{cache}{}
+\item{cache}{user-provided filepath for where to store data etc}
 
 \item{v_rm}{which node should we remove}
+
+\item{ncores}{number of cores to use for calculations}
 }
 \description{
 function to do in-silico repression for a given gene on all cell lines in the GDSC

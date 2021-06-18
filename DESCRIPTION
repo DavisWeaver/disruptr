@@ -14,6 +14,11 @@ Description: What the package does (one paragraph).
 License: GPL (>= 3)
 Imports:
     crosstalkr,
+    rlang, 
+    Matrix, 
+    curl, 
+    stringr, 
+    tibble,
     igraph,
     dplyr,
     tidyr,
@@ -25,7 +30,8 @@ Imports:
     Rcpp, 
     foreach,
     doParallel,
-    parallel
+    parallel, 
+    iterators
 LinkingTo: 
     Rcpp
 Encoding: UTF-8

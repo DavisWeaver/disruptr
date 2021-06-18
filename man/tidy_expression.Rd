@@ -6,6 +6,9 @@
 \usage{
 tidy_expression(df)
 }
+\arguments{
+\item{df}{dataframe}
+}
 \description{
 helper function to convert expression matrix to tidy dataframe (if not already)
 }

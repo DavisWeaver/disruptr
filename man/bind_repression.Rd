@@ -13,7 +13,9 @@ bind_repression(df, cell_lines, i, repression_vector, v_rm)
 
 \item{i}{index value for `cell_lines}
 
-\item{repression_vector}{}
+\item{repression_vector}{output of node_repression function in gdsc_repress}
+
+\item{v_rm}{which node should we remove?}
 }
 \description{
 helper function to bind the repression vector to df_i in gdsc_repress

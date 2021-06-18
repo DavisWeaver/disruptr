@@ -10,7 +10,7 @@ v_check <- seeds[5]
 g <- igraph::induced_subgraph(g, seeds)
 
 np_diff <- node_repression(g, v_rm = v_check, exp = toy_exp,
-                           state_function = calc_np_all2)
+                           state_function = calc_np_all)
 np_diff <- np_diff[,1]
 expected_np_diff <- c(0.0, 6.21, 0.0, 0.082, 2.23, 0.0)
 names(expected_np_diff) <- seeds
@@ -27,7 +27,7 @@ test_that("node_repression produces expected results", {
 ######Multiple Nodes#####
 
 np_diff <- node_repression(g, v_rm = seeds[1:3], exp = toy_exp,
-                           state_function = calc_np_all2)
+                           state_function = calc_np_all)
 
 test_that("removing multiple nodes works", {
   expect_equal(ncol(np_diff), 3)
@@ -36,7 +36,7 @@ test_that("removing multiple nodes works", {
 
 ####Every Node#####
 
-np_diff <- node_repression(g, v_rm = seeds, exp = toy_exp, state_function = calc_np_all2)
+np_diff <- node_repression(g, v_rm = seeds, exp = toy_exp, state_function = calc_np_all)
 
 test_that("removing every node works", {
   expect_equal(ncol(np_diff), 6)
