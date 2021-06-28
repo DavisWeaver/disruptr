@@ -55,14 +55,14 @@ compute_null <- function(cache = NULL, df, ppi = "biogrid", n,
   doParallel::registerDoParallel(cl)
   null_df <-
     foreach::foreach(j = iterators::iter(df_list),
-                     .packages = "disruptr", .combine = "rbind") %dopar%
+                     .packages = "disruptr", .combine = "rbind") %:%
     {
-      #get the info on the top genes for a given sample
-      j_sample <- j$sample_name[1]
-      v_j <- v_df[,j_sample][[1]][[1]] #Indexing is gross but this just grabs the top 50 genes for a given sample
-      cell_line_df <-
-        foreach::foreach(i = 1:n, .combine = "rbind", .packages = "disruptr") %do%
+      foreach::foreach(i = 1:n, .combine = "combine_null",
+                       .packages = "disruptr") %dopar%
         {
+          #get the info on the top genes for a given sample
+          j_sample <- j$sample_name[1]
+          v_j <- v_df[,j_sample][[1]][[1]] #Indexing is gross but this just grabs the top 50 genes for a given sample
           #scramble the graph
           g_i <- get_random_graph(g)
 
@@ -71,12 +71,12 @@ compute_null <- function(cache = NULL, df, ppi = "biogrid", n,
           dnp_ij$i = i
           return(dnp_ij)
         }
-      null_j_df <- cell_line_df %>%
-        dplyr::group_by(.data$gene_name, .data$sample_name) %>%
-        dplyr::summarise(mean_dnp = mean(.data$np),
-                         sd_dnp = sd(.data$dnp),
-                         n = dplyr::n())
-      return(null_j_df)
+      # null_j_df <- cell_line_df %>%
+      #   dplyr::group_by(.data$gene_name, .data$sample_name) %>%
+      #   dplyr::summarise(mean_dnp = mean(.data$np),
+      #                    sd_dnp = sd(.data$dnp),
+      #                    n = dplyr::n())
+      #return(null_j_df)
 
     }
 
@@ -115,4 +115,18 @@ get_topn <- function(df, n_genes) {
     tidyr::pivot_wider(names_from = .data$sample_name,
                        values_from = .data$gene_name,
                        values_fn = list)
+}
+#' .combine function for compute_null foreach looping structure
+#'
+#' @inheritParams compute_null
+#' @importFrom magrittr %>%
+#' @export
+
+combine_null <- function(...) {
+  df <- bind_rows(list(...))
+  df %>%
+    dplyr::group_by(.data$gene_name, .data$sample_name) %>%
+    dplyr::summarise(mean_dnp = mean(.data$np),
+                     sd_dnp = sd(.data$dnp),
+                     n = dplyr::n())
 }
