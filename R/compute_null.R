@@ -80,7 +80,7 @@ compute_null <- function(cache = NULL, df, ppi = "biogrid", n,
 
         mem_df[[i]] <- dnp_ij
 
-        if(i %% 5 == 0) {
+        if(i %% 10 == 0) {
           agg_df[[z]] <- combine_null(mem_df)
           agg_df[[z]]$z <- z
           mem_df <- list() #clear "mememory
