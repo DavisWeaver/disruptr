@@ -61,7 +61,7 @@ get_dr <- function(cache) {
   # check if file has already been downloaded at the provided cache
   if(!file.exists(paste0(cache, "/gdsc_dr.xlsx"))) {
     # download file, store in `Data` dir
-    curl::curl_download("ftp://ftp.sanger.ac.uk/pub/project/cancerrxgene/releases/current_release/GDSC2_fitted_dose_response_25Feb20.xlsx",
+    curl::curl_download("ftp://ftp.sanger.ac.uk/pub/project/cancerrxgene/releases/release-8.4/GDSC2_fitted_dose_response_24Jul22.xlsx",
                         destfile = paste0(cache, "/gdsc_dr.xlsx"))
   } else {
     message("using cached gdsc data")
